@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import samplequery from './samplequery';
 import Tabs from './src/Tabs';
+import GOAT from './src/GOAT';
 import Geolocation from '@react-native-community/geolocation';
 import axios from 'axios';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
@@ -23,13 +24,15 @@ class App extends Component {
       locError: '',
       foods: '',
       foodsError: '',
+      liked: '',
+      likedError: '',
     };
     this.updateHome = this.updateHome.bind(this);
     this.getLoc = this.getLoc.bind(this);
   }
 
   getFoods(lat, long) {
-    axios.get('http://localhost:3000/', { lat, long })
+    axios.get('http://localhost:3000/', { params: { lat, long } })
       .then(foods => this.setState({ foods: foods.data }))
       .catch(foodsError => this.setState({ foodsError }))
   }
@@ -52,9 +55,15 @@ class App extends Component {
     }
   }
 
-  // componentDidMount() {
-  //   // this.getLoc();
-  // }
+  getLikes() {
+    axios.get('http://localhost:3000/api/restaurants')
+      .then(liked => this.setState({ liked: liked.data }))
+      .catch(err => this.setState({ likesError: err }))
+  }
+
+  componentDidMount() {
+    this.getLikes();
+  }
 
   render() {
     const search = <View style={styles.searchContainer}>
@@ -67,18 +76,22 @@ class App extends Component {
         foods: {this.state.foods}
       </Text></View>;
 
+    const homeView = this.state.locationSet ? found : search;
+
+    const likedView = <View style={styles.foundContainer}><GOAT restaurants={this.state.liked} /></View>
+
     return (
-      <>
-        {this.state.locationSet ? found : search}
-        <Tabs updateHome={this.updateHome} />
-      </>
+      <View style={styles.body}>
+        {this.state.home ? homeView : likedView}
+        <Tabs style={styles.tabs} updateHome={this.updateHome} home={this.state.home} />
+      </View>
     )
   }
 }
 
 const styles = StyleSheet.create({
   foundContainer: {
-    marginTop: 52,
+    paddingTop: 52,
     paddingHorizontal: 24,
   },
   foundTitle: {
@@ -100,15 +113,23 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   searchContainer: {
-    marginTop: 300,
+    paddingTop: 300,
     fontSize: 18,
     fontWeight: '600',
     color: Colors.dark,
   },
   tabs: {
     marginBottom: 0,
-    backgroundColor: Colors.yellow,
+    backgroundColor: 'yellow',
+    height: '200'
   },
+  body: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    height: '100%',
+    backgroundColor: 'white'
+  }
 });
 
 export default App;
