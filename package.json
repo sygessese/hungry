@@ -16,7 +16,8 @@
     "mongodb": "^3.3.4",
     "mongoose": "^5.7.11",
     "react": "16.9.0",
-    "react-native": "0.61.4"
+    "react-native": "0.61.4",
+    "request": "^2.88.0"
   },
   "devDependencies": {
     "@babel/core": "^7.6.2",
