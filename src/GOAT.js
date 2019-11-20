@@ -15,7 +15,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     width: '100%',
     height: '100%',
-    marginTop: '5%'
+    paddingTop: '15%'
   },
   listItem: {
     fontSize: 25,
@@ -32,8 +32,8 @@ export default class GOAT extends Component {
 
     const likedRestaurants = this.props.restaurant === '' ? 'empty' : (this.props.restaurants).map((restaurant, id) => {
       return <Text key={id} style={styles.listItem}>
-        <Text>{id + 1}. </Text>
-        <Text>{restaurant} </Text>
+        <Text> ❥ </Text>
+        <Text> {restaurant} </Text>
       </Text>
     })
 
