@@ -2,14 +2,17 @@ import React, { Component } from 'react';
 import samplequery from './samplequery';
 import Tabs from './src/Tabs';
 import GOAT from './src/GOAT';
+import Restaurants from './src/Restaurants';
 import Geolocation from '@react-native-community/geolocation';
 import axios from 'axios';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
+import yelpAPI from './yelpAPI';
 
 import {
   StyleSheet,
   View,
   Text,
+  ScrollView,
 } from 'react-native';
 
 
@@ -19,10 +22,11 @@ class App extends Component {
     this.state = {
       home: true,
       locationSet: false,
+      foodFetched: false,
       lat: '',
       long: '',
       locError: '',
-      foods: '',
+      foods: [],
       foodsError: '',
       liked: '',
       likedError: '',
@@ -31,9 +35,22 @@ class App extends Component {
     this.getLoc = this.getLoc.bind(this);
   }
 
-  getFoods(lat, long) {
-    axios.get('http://localhost:3000/', { params: { lat, long } })
-      .then(foods => this.setState({ foods: foods.data }))
+  // latitude: ${this.state.lat},
+  // longitude: ${this.state.long},
+
+  getFoods() {
+    axios.get('http://localhost:3000/test')
+      .then(foods => {
+        var results = [];
+        foods.data.data.search.business.map(({ categories, name, id, photos, price, rating, review_count }) => {
+          categories = categories.map(({ title }) => title)
+          results.push([categories, name, id, photos, price, rating, review_count]);
+        })
+        this.setState({
+          foods: results,
+          foodFetched: true
+        })
+      })
       .catch(foodsError => this.setState({ foodsError }))
   }
 
@@ -42,7 +59,7 @@ class App extends Component {
       (position) => {
         var lat = parseFloat(position.coords.latitude);
         var long = parseFloat(position.coords.longitude);
-        this.setState({ lat, long, locationSet: true }, () => this.getFoods(this.state.lat, this.state.long))
+        this.setState({ lat, long, locationSet: true }, this.getFoods)
       },
       (locError) => this.setState({ locError: locError.message }),
       { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 },
@@ -69,16 +86,18 @@ class App extends Component {
     const search = <View style={styles.searchContainer}>
       <Text style={styles.searchTitle} onPress={this.getLoc}>Hungry</Text></View>;
 
-    const found = <View style={styles.foundContainer}>
-      <Text style={styles.foundTitle}>Hungry</Text>
-      <Text style={styles.foundDescription}>
-        lat: {this.state.lat} long: {this.state.long}
-        foods: {this.state.foods}
-      </Text></View>;
+    const found =
+      <View style={styles.foundContainer}>
+        <Text style={styles.foundTitle}>Hungry</Text>
+        {this.state.foodFetched ?
+          <ScrollView style={{ flexGrow: 1 }}><Restaurants foods={this.state.foods} /></ScrollView> :
+          <Text>{this.state.foodsError}</Text>}
+      </View>
+      ;
 
     const homeView = this.state.locationSet ? found : search;
 
-    const likedView = <View style={styles.foundContainer}><GOAT restaurants={this.state.liked} /></View>
+    const likedView = <View style={styles.GOATContainer}><GOAT restaurants={this.state.liked} /></View>
 
     return (
       <View style={styles.body}>
@@ -90,45 +109,50 @@ class App extends Component {
 }
 
 const styles = StyleSheet.create({
+  GOATContainer: {
+    paddingTop: '10%',
+    backgroundColor: '#9eafc1',
+    height: '100%',
+  },
   foundContainer: {
-    paddingTop: 52,
-    paddingHorizontal: 24,
+    backgroundColor: '#9eafc1',
+    height: '100%',
+    paddingTop: '10%',
+    display: 'flex',
+    flexDirection: 'column',
   },
   foundTitle: {
     fontSize: 24,
     fontWeight: '600',
     color: Colors.black,
+    height: 40,
+    marginBottom: 0,
     textAlign: 'center',
-  },
-  foundDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-    color: Colors.dark,
+    backgroundColor: '#9eafc1',
   },
   searchTitle: {
     fontSize: 50,
     fontWeight: '600',
+    paddingTop: 300,
     color: Colors.black,
     textAlign: 'center',
   },
   searchContainer: {
-    paddingTop: 300,
     fontSize: 18,
     fontWeight: '600',
     color: Colors.dark,
+    height: '100%',
   },
   tabs: {
-    marginBottom: 0,
-    backgroundColor: 'yellow',
-    height: '200'
+    backgroundColor: 'black',
+    zIndex: 99,
+    height: '30%',
   },
   body: {
     display: 'flex',
     flexDirection: 'column',
-    justifyContent: 'space-between',
-    height: '100%',
-    backgroundColor: 'white'
+    height: '92%',
+    backgroundColor: 'slategray'
   }
 });
 
