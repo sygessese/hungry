@@ -6,7 +6,7 @@ const db = require('./db/connection');
 const request = require('request');
 
 var headers = {
-  'Authorization': 'Bearer Cltrz7Tt9bodyBWjZV7wzKKIQbpG_yg4XbHP-0KOiIzvP0eRKK-jNKyhwajRAAInJIV_7-NBFmUlykKJX-8worvIvpf40h5f9Jstlx-zkwOF4a3F2RvqpixbolnQXXYx',
+  'Authorization': '',
   'Content-Type': 'application/graphql'
 };
 
